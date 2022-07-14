@@ -26,7 +26,9 @@ function isEmptySpace(pixelData) {
 }
 
 function isPixelBrushed(data, pixelPos, color) {
-    return 250 < data[pixelPos] + data[pixelPos + 1] + data[pixelPos + 2] + data[pixelPos + 3]
+    console.log()
+    return 300 > data[pixelPos] + data[pixelPos + 1] + data[pixelPos + 2]
+    // return 250 < data[pixelPos] + data[pixelPos + 1] + data[pixelPos + 2] + data[pixelPos + 3]
 
     // return color.r === data[pixelPos] &&
     //     color.g === data[pixelPos + 1] &&
@@ -77,33 +79,37 @@ function getRightPixelPos(pixelPos) {
     return getRowNumber(pixelPos) === getRowNumber(pos) ? pos : undefined
 }
 
+function isPositionVacant(pixelPosition, queue, data, brashColor) {
+    return null != pixelPosition && !queue.has(pixelPosition) && !isPixelBrushed(data, pixelPosition, brashColor)
+}
+
 function addToQueueTopPixel(pixelPos, queue, brashColor, data) {
     const topPixelPos = getTopPixelPos(pixelPos, data);
-    if (null != topPixelPos && !queue.has(topPixelPos) && !isPixelBrushed(data, topPixelPos, brashColor)) {
+    if (isPositionVacant(topPixelPos, queue, data,  brashColor)) {
         queue.push(topPixelPos)
     }
 }
 function addToQueueBottomPixel(pixelPos, queue, brashColor, data) {
     const bottomPixelPos = getBottomPixelPos(pixelPos, data);
-    if (null != bottomPixelPos && !queue.has(bottomPixelPos) && !isPixelBrushed(data, bottomPixelPos, brashColor)) {
+    if (isPositionVacant(bottomPixelPos, queue, data,  brashColor)) {
         queue.push(bottomPixelPos)
     }
 }
-function addToQueueLeftPixel(pixelPos, queue, brashColor, imageData) {
+function addToQueueLeftPixel(pixelPos, queue, brashColor, data) {
     const leftPixelPos = getLeftPixelPos(pixelPos);
-    if (null != leftPixelPos && !isPixelBrushed(imageData, leftPixelPos, brashColor)) {
+    if (isPositionVacant(leftPixelPos, queue, data, brashColor)) {
         queue.push(leftPixelPos)
     }
 }
-function addToQueueRightPixel(pixelPos, queue, brashColor, imageData) {
+function addToQueueRightPixel(pixelPos, queue, brashColor, data) {
     const rightPixelPos = getRightPixelPos(pixelPos);
-    if (null != rightPixelPos && !isPixelBrushed(imageData, rightPixelPos, brashColor)) {
+    if (isPositionVacant(rightPixelPos, queue, data, brashColor)) {
         queue.push(rightPixelPos)
     }
 }
 //
 function beginTop(pixelPos, queue, brashColor, data) {
-    while (pixelPos && !isPixelBrushed(data, pixelPos, brashColor)) {
+    while (isPositionVacant(pixelPos, queue, data, brashColor)) {
         queue.push(pixelPos)
         beginLeft(pixelPos,queue, brashColor, data);
         beginRight(pixelPos, queue, brashColor, data);
@@ -112,7 +118,7 @@ function beginTop(pixelPos, queue, brashColor, data) {
 }
 
 function beginBottom(pixelPos, queue, brashColor, data) {
-    while (pixelPos && !isPixelBrushed(data, pixelPos, brashColor)) {
+    while (isPositionVacant(pixelPos, queue, data, brashColor)) {
         queue.push(pixelPos)
         beginLeft(pixelPos,queue, brashColor, data);
         beginRight(pixelPos, queue, brashColor, data);
@@ -121,10 +127,8 @@ function beginBottom(pixelPos, queue, brashColor, data) {
 }
 
 function beginLeft(pixelPos, queue, brashColor, data) {
-    while (pixelPos && !queue.has(pixelPos) && !isPixelBrushed(data, pixelPos, brashColor)) {
+    while (isPositionVacant(pixelPos, queue, data, brashColor)) {
         queue.push(pixelPos)
-        addToQueueTopPixel(pixelPos, queue, brashColor, data);
-        addToQueueBottomPixel(pixelPos, queue, brashColor, data);
         beginTop(pixelPos, queue, brashColor, data);
         beginBottom(pixelPos, queue, brashColor, data);
         pixelPos = getLeftPixelPos(pixelPos);
@@ -132,12 +136,8 @@ function beginLeft(pixelPos, queue, brashColor, data) {
 }
 
 function beginRight(pixelPos, queue, brashColor, data) {
-    while (pixelPos && !queue.has(pixelPos) && !isPixelBrushed(data, pixelPos, brashColor)) {
-        console.log(queue)
+    while (isPositionVacant(pixelPos, queue, data, brashColor)) {
         queue.push(pixelPos)
-        console.log(queue)
-        addToQueueTopPixel(pixelPos, queue, brashColor, data);
-        addToQueueBottomPixel(pixelPos, queue, brashColor, data);
         beginTop(pixelPos, queue, brashColor, data);
         beginBottom(pixelPos, queue, brashColor, data);
         pixelPos = getRightPixelPos(pixelPos);
@@ -174,10 +174,11 @@ function brash(data, x, y, brashColor) {
 
         if (!isPixelBrushed(data, lastInQueue, brashColor)) {
             brashPixel(data, lastInQueue, brashColor)
-            addToQueueTopPixel(lastInQueue, queue, brashColor, data)
-            addToQueueRightPixel(lastInQueue, queue, brashColor, data)
-            addToQueueBottomPixel(lastInQueue, queue, brashColor, data)
-            addToQueueLeftPixel(lastInQueue, queue, brashColor, data)
+
+            beginTop(getTopPixelPos(lastInQueue, data), queue, brashColor,data)
+            beginBottom(getBottomPixelPos(lastInQueue, data), queue, brashColor,data)
+            beginLeft(getLeftPixelPos(lastInQueue), queue, brashColor,data)
+            beginRight(getRightPixelPos(lastInQueue), queue, brashColor,data)
         }
     }
 }
@@ -191,7 +192,7 @@ function drawPixel(imageData) {
 
 
 img.onload = () => {
-    // ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
     // ctx.fillStyle = 'white';
     // ctx.clear();
     imageData = ctx.getImageData(0,0, canvas.width, canvas.height)
