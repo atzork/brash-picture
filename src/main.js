@@ -237,7 +237,6 @@ img.onload = () => {
     imageData = ctx.getImageData(0,0, canvas.width, canvas.height)
     // normalizeImageData(imageData.data)
 
-    drawImageData(imageData);
     console.log('img.onload', imageData)
 }
 
