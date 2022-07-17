@@ -13,7 +13,7 @@ function clicked(event, canvas) {
     console.log(event.clientX + ' : ' + event.clientY)
     const coords = getMousePosition(canvas, event)
     brash(imageData.data, coords[0], coords[1], {r: 0, g: 0, b: 0})
-    drawPixel(imageData)
+    drawImageData(imageData)
 }
 
 function getMousePosition(canvas, event) {
@@ -26,13 +26,9 @@ function isEmptySpace(pixelData) {
 }
 
 function isPixelBrushed(data, pixelPos, color) {
-    console.log()
-    return 300 > data[pixelPos] + data[pixelPos + 1] + data[pixelPos + 2]
-    // return 250 < data[pixelPos] + data[pixelPos + 1] + data[pixelPos + 2] + data[pixelPos + 3]
-
-    // return color.r === data[pixelPos] &&
-    //     color.g === data[pixelPos + 1] &&
-    //     color.b === data[pixelPos + 2]
+    return (color.r === data[pixelPos] &&
+        color.g === data[pixelPos + 1] &&
+        color.b === data[pixelPos + 2]) || 600 > data[pixelPos] + data[pixelPos + 1] + data[pixelPos + 2] + data[pixelPos + 3]
 }
 
 function brashPixel(data, pixelPos, color) {
@@ -168,23 +164,67 @@ function brash(data, x, y, brashColor) {
         return last
     }
 
-
     while (queue.size) {
-        const lastInQueue = queue.pop();
+        let position = queue.pop();
 
-        if (!isPixelBrushed(data, lastInQueue, brashColor)) {
-            brashPixel(data, lastInQueue, brashColor)
+        let leftStep = false;
+        let rightStep = false;
+        if (!isPixelBrushed(data, position, brashColor)) {
+            brashPixel(data, position, brashColor)
+        //
+        //     position = getBottomPixelPos(position, data)
+        //     let prevPosition;
+        //     while (position && !isPixelBrushed(data, position, brashColor))
+        //     {
+        //         prevPosition = position;
+        //         position = getBottomPixelPos(position, data)
+        //     }
+        //     position = prevPosition;
+        //
+        //     while (position && !isPixelBrushed(data, position, brashColor)) {
+        //         brashPixel(data, position, brashColor)
+        //
+        //         const leftPos = getLeftPixelPos(position)
+        //         const rightPos = getRightPixelPos(position)
+        //         if (!leftStep && leftPos && !isPixelBrushed(data, leftPos, brashColor))
+        //         {
+        //             leftStep = true;
+        //             queue.push(leftPos);
+        //         } else if (leftStep)
+        //         {
+        //             leftStep = false;
+        //         }
+        //         if (!rightStep && rightPos && !isPixelBrushed(data, rightPos, brashColor))
+        //         {
+        //             rightStep = true;
+        //             queue.push(rightPos)
+        //         } else if (rightStep) {
+        //             rightStep = false;
+        //         }
+        //
+        //         position = getTopPixelPos(position, data)
+        //     }
 
-            beginTop(getTopPixelPos(lastInQueue, data), queue, brashColor,data)
-            beginBottom(getBottomPixelPos(lastInQueue, data), queue, brashColor,data)
-            beginLeft(getLeftPixelPos(lastInQueue), queue, brashColor,data)
-            beginRight(getRightPixelPos(lastInQueue), queue, brashColor,data)
+            beginTop(getTopPixelPos(position, data), queue, brashColor,data)
+            beginBottom(getBottomPixelPos(position, data), queue, brashColor,data)
+            beginLeft(getLeftPixelPos(position), queue, brashColor,data)
+            beginRight(getRightPixelPos(position), queue, brashColor,data)
         }
     }
 }
 
+function normalizeImageData(data) {
+    for (let i = 0; i < data.length; i += 4) {
+        if(data[i] < 250) {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+            data[i + 3] = 100;
+        }
+    }
+}
 
-function drawPixel(imageData) {
+function drawImageData(imageData) {
     window.requestAnimationFrame(() => {
         ctx.putImageData(imageData, 0, 0)
     });
@@ -196,6 +236,9 @@ img.onload = () => {
     // ctx.fillStyle = 'white';
     // ctx.clear();
     imageData = ctx.getImageData(0,0, canvas.width, canvas.height)
+    // normalizeImageData(imageData.data)
+
+    drawImageData(imageData);
     console.log('img.onload', imageData)
 }
 
