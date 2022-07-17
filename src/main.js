@@ -170,45 +170,44 @@ function brash(data, x, y, brashColor) {
         let leftStep = false;
         let rightStep = false;
         if (!isPixelBrushed(data, position, brashColor)) {
-            brashPixel(data, position, brashColor)
-        //
-        //     position = getBottomPixelPos(position, data)
-        //     let prevPosition;
-        //     while (position && !isPixelBrushed(data, position, brashColor))
-        //     {
-        //         prevPosition = position;
-        //         position = getBottomPixelPos(position, data)
-        //     }
-        //     position = prevPosition;
-        //
-        //     while (position && !isPixelBrushed(data, position, brashColor)) {
-        //         brashPixel(data, position, brashColor)
-        //
-        //         const leftPos = getLeftPixelPos(position)
-        //         const rightPos = getRightPixelPos(position)
-        //         if (!leftStep && leftPos && !isPixelBrushed(data, leftPos, brashColor))
-        //         {
-        //             leftStep = true;
-        //             queue.push(leftPos);
-        //         } else if (leftStep)
-        //         {
-        //             leftStep = false;
-        //         }
-        //         if (!rightStep && rightPos && !isPixelBrushed(data, rightPos, brashColor))
-        //         {
-        //             rightStep = true;
-        //             queue.push(rightPos)
-        //         } else if (rightStep) {
-        //             rightStep = false;
-        //         }
-        //
-        //         position = getTopPixelPos(position, data)
-        //     }
 
-            beginTop(getTopPixelPos(position, data), queue, brashColor,data)
-            beginBottom(getBottomPixelPos(position, data), queue, brashColor,data)
-            beginLeft(getLeftPixelPos(position), queue, brashColor,data)
-            beginRight(getRightPixelPos(position), queue, brashColor,data)
+            position = getBottomPixelPos(position, data)
+            let prevPosition;
+            while (position && !isPixelBrushed(data, position, brashColor))
+            {
+                prevPosition = position;
+                position = getBottomPixelPos(position, data)
+            }
+            position = prevPosition;
+
+            while (position && !isPixelBrushed(data, position, brashColor)) {
+                brashPixel(data, position, brashColor)
+
+                const leftPos = getLeftPixelPos(position)
+                const rightPos = getRightPixelPos(position)
+                if (!leftStep && leftPos && !isPixelBrushed(data, leftPos, brashColor))
+                {
+                    leftStep = true;
+                    queue.push(leftPos);
+                } else if (leftStep)
+                {
+                    leftStep = false;
+                }
+                if (!rightStep && rightPos && !isPixelBrushed(data, rightPos, brashColor))
+                {
+                    rightStep = true;
+                    queue.push(rightPos)
+                } else if (rightStep) {
+                    rightStep = false;
+                }
+
+                position = getTopPixelPos(position, data)
+            }
+
+            // beginTop(getTopPixelPos(position, data), queue, brashColor,data)
+            // beginBottom(getBottomPixelPos(position, data), queue, brashColor,data)
+            // beginLeft(getLeftPixelPos(position), queue, brashColor,data)
+            // beginRight(getRightPixelPos(position), queue, brashColor,data)
         }
     }
 }
